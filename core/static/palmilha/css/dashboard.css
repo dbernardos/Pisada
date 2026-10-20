@@ -1,0 +1,311 @@
+/* Importando uma fonte mais amigável e moderna (Poppins) do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    /*font-family: 'Poppins', sans-serif;  Aplicando a nova fonte */
+    font-family: 'Inter', sans-serif; /* Aplicando a nova fonte */
+}
+
+body {
+    /* 1. Fundo em cinza chumbo mais claro */
+    background-color: #161e2e; 
+    color: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Top Bar / Header */
+.header {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-capsule {
+    /* 1. Cinza chumbo mais claro para os containers */
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    padding: 4px;
+    display: flex;
+    gap: 5px;
+}
+
+.nav-btn {
+    padding: 6px 18px;
+    border-radius: 16px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.nav-btn.active {
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.user-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    color: #94a3b8;
+}
+
+/* Main Dashboard Frame */
+.dashboard-card {
+    width: 100%;
+    max-width: 1100px;
+    /* 1. Card principal em cinza chumbo translúcido mais claro */
+    background: rgba(30, 41, 59, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #f8fafc;
+    margin-bottom: 20px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 240px 1fr 260px;
+    gap: 20px;
+}
+
+/* Cards Esquerda e Direita */
+.info-card {
+    /* 1. Blocos internos em cinza chumbo mais claro */
+    background-color: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.label-sm {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.val-md {
+    font-size: 15px;
+    color: #f8fafc;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.info-card p:last-child .val-md {
+    margin-bottom: 0;
+}
+
+/* Painel Central - Mapa de Calor */
+.heatmap-container {
+    background-color: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+/* 3. Quadro da planta do pé maior e inteiro com grade */
+.foot-grid-area {
+    position: relative;
+    width: 260px; /* Aumentado de 220px para 260px */
+    height: 420px; /* Aumentado de 380px para 420px */
+    background-size: 20px 20px;
+    /* Grade aplicada preenchendo toda a extensão do bloco */
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.foot-outline {
+    position: absolute;
+    width: 190px;
+    height: 380px;
+    border: 2px dashed rgba(56, 189, 248, 0.25);
+    border-radius: 90px 90px 70px 70px;
+    clip-path: polygon(30% 0%, 70% 0%, 90% 15%, 85% 35%, 65% 55%, 70% 85%, 50% 100%, 25% 95%, 35% 65%, 15% 35%, 10% 15%);
+}
+
+.heat-spot {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(12px);
+    opacity: 0.85;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+/* Ajuste proporcional das posições das manchas para o novo tamanho do quadro */
+#spot-calcaneo {
+    top: 78%; left: 52%; width: 70px; height: 70px;
+    background: radial-gradient(circle, #ff0000 0%, #ff7700 40%, #a2ff00 70%, transparent 100%);
+}
+
+#spot-antepe-med {
+    top: 32%; left: 38%; width: 60px; height: 60px;
+    background: radial-gradient(circle, #ff0000 0%, #ff5500 45%, #00ff66 75%, transparent 100%);
+}
+
+#spot-antepe-lat {
+    top: 36%; left: 62%; width: 50px; height: 50px;
+    background: radial-gradient(circle, #ffff00 0%, #00ff22 60%, transparent 100%);
+}
+
+#spot-halux {
+    top: 14%; left: 32%; width: 40px; height: 40px;
+    background: radial-gradient(circle, #ff1100 0%, #ffbb00 50%, transparent 100%);
+}
+
+#spot-dedos {
+    top: 18%; left: 58%; width: 45px; height: 30px;
+    background: radial-gradient(circle, #00ffbb 0%, #0044ff 70%, transparent 100%);
+}
+
+/* Legenda de Pressão Inferior */
+.legend-box {
+    width: 100%;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.legend-title {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.legend-bar {
+    height: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    border-radius: 5px;
+    background: linear-gradient(to right, #0022ff, #00d4ff, #00ff22, #ffff00, #ff6600, #cc0000);
+}
+
+.legend-ticks {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 360px;
+    margin: 4px auto 0 auto;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* Destaques Lado Direito */
+.pressure-peak {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ef4444;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.pressure-unit {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: normal;
+}
+
+.list-items {
+    list-style: none;
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.list-items li {
+    margin-bottom: 6px;
+}
+
+.btn-action {
+    width: 100%;
+    padding: 10px;
+    /* 1. Tom de cinza chumbo mais claro para o botão */
+    background: linear-gradient(135deg, #334155, #475569);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f8fafc;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.btn-action:hover {
+    background: #64748b;
+}
+
+/* Quadro central da planta do pé */
+.foot-grid-area {
+    position: relative;
+    width: 260px;
+    height: 420px;
+    background-size: 20px 20px;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Garante que a imagem não vaze do quadro */
+}
+
+/* Imagem da planta do pé centralizada no quadro */
+.foot-image-bg {
+    position: absolute;
+    width: 820px; /* Ajuste o tamanho conforme a proporção da sua imagem */
+    height: auto;
+    object-fit: contain;
+    opacity: 0.85; /* Deixa a imagem sutil ao fundo */
+    pointer-events: none; /* Permite que cliques passem direto se necessário */
+}
