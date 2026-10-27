@@ -115,5 +115,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Adicione esta linha para informar ao Django onde procurar os arquivos estáticos globais ou do app
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'palmilha/static'), 
+    os.path.join(BASE_DIR, 'core/static'), 
 ]
