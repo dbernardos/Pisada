@@ -1,0 +1,370 @@
+{% extends 'core/base.html' %}
+{% load static l10n %}
+
+{% block title %}
+  Dashboard - Baropodometria
+{% endblock %}
+
+{% block content %}
+  <div class="dashboard-card">
+    <h2 class="dashboard-title">Análise de Pisada - Relatório de Pressão Plantar</h2>
+
+    <div class="controls">
+      <button id="btn-start" class="btn btn-primary" type="button">▶ Iniciar Simulação</button>
+      <button id="btn-stop" class="btn btn-secondary" type="button" disabled>⏹ Parar</button>
+      <label>
+        Pé:
+        <select id="side-select">
+          <option value="L">Esquerdo</option>
+          <option value="R">Direito</option>
+        </select>
+      </label>
+      <span id="sim-status" class="sim-status" role="status">⏸ Parado</span>
+
+      {% if selectable_exams %}
+        <form method="get" class="exam-picker">
+          <label>
+            Exame:
+            <select name="exam" id="exam-select">
+              {% for e in selectable_exams %}
+                <option value="{{ e.pk }}" {% if exam and e.pk == exam.pk %}selected{% endif %}>
+                  {{ e.patient.name }} — {{ e.exam_date|date:'d/m/Y H:i' }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+        </form>
+      {% endif %}
+    </div>
+<br />
+    <div class="grid-container">
+      <!-- Painel Esquerdo: Dados do Paciente e Exame -->
+      <div class="left-panel">
+        <div class="info-card">
+          <span class="label-sm">Paciente:</span>
+          <div class="val-md">{{ patient.name|default:'Nenhum paciente' }}</div>
+
+          <span class="label-sm">Nascimento:</span>
+          <div class="val-md">
+            {% if patient %}{{ patient.birth_date|date:'d/m/Y' }} ({{ patient.age }} anos){% else %}-{% endif %}
+          </div>
+
+          <span class="label-sm">Calçado / Peso / Altura:</span>
+          <div class="val-md val-sm">
+            {{ exam.footwear|default:'-' }} | {{ patient.weight_kg|default:'--' }} kg | {{ patient.height_m|default:'--' }} m
+          </div>
+
+          <span class="label-sm">Data / Hora Exame:</span>
+          <div class="val-md val-sm">{{ exam.exam_date|date:'d/m/Y H:i'|default:'--' }}</div>
+
+          <span class="label-sm">Profissional:</span>
+          <div class="val-md val-sm">{{ exam.doctor.name|default:'--' }}</div>
+        </div>
+
+        <div class="info-card">
+          <span class="label-sm">Métricas Pé Esquerdo:</span>
+          <div class="val-md val-xs">
+            {% if foot_left %}
+              Superfície: {{ foot_left.surface_cm2|floatformat:1 }} cm²<br />
+              P. Máx: {{ foot_left.max_pressure_kgf_cm2|floatformat:2 }} | P. Méd: {{ foot_left.avg_pressure_kgf_cm2|floatformat:2 }} kgf/cm²<br />
+              Carga: {{ foot_left.load_percentage|floatformat:1 }}%
+            {% else %}
+              Sem dados
+            {% endif %}
+          </div>
+
+          <span class="label-sm label-spaced">Métricas Pé Direito:</span>
+          <div class="val-md val-xs">
+            {% if foot_right %}
+              Superfície: {{ foot_right.surface_cm2|floatformat:1 }} cm²<br />
+              P. Máx: {{ foot_right.max_pressure_kgf_cm2|floatformat:2 }} | P. Méd: {{ foot_right.avg_pressure_kgf_cm2|floatformat:2 }} kgf/cm²<br />
+              Carga: {{ foot_right.load_percentage|floatformat:1 }}%
+            {% else %}
+              Sem dados
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Painel Central: planta do pé + mapa de calor desenhado sobre ela -->
+      <div class="heatmap-container">
+        <div class="foot-grid-area" id="foot-area" data-image-side="L">
+          <img id="foot-img" src="{% static 'core/images/mapa_planta_pe.png' %}" alt="Mapa da planta do pé" class="foot-image-bg" />
+          <canvas id="heatmap-canvas" class="foot-canvas" width="520" height="840" aria-label="Mapa de calor da pressão plantar"></canvas>
+        </div>
+
+        <div class="legend-box">
+          <div class="legend-title">Legenda de Pressão (kgf/cm²)</div>
+          <div class="legend-bar"></div>
+          <div class="legend-ticks">
+            <span>0</span>
+            <span>2</span>
+            <span>4</span>
+            <span>6</span>
+            <span>8+</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span>Frame: <strong id="frame-counter">0</strong></span>
+          <span>Última atualização: <strong id="last-update">—</strong></span>
+        </div>
+      </div>
+
+      <!-- Painel Direito: Distribuição e Estabilometria -->
+      <div class="right-panel">
+        <div class="info-card">
+          <span class="label-sm">Pico de Pressão Geral:</span>
+          <div class="pressure-peak">
+            <span id="val-pico">{% if peak_pressure %}{{ peak_pressure|floatformat:2 }}{% else %}—{% endif %}</span>
+            <span class="pressure-unit">kgf/cm²</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <span class="label-sm">Distribuição de Pressão:</span>
+          <ul class="list-items val-xs">
+            {% for d in distributions %}
+              <li><strong>{{ d.get_region_display }}:</strong> {{ d.percentage|floatformat:1 }}%</li>
+            {% empty %}
+              <li>Sem dados</li>
+            {% endfor %}
+            {% if foot_left and foot_right %}
+              <li>
+                <strong>Carga Esq/Dir:</strong> {{ foot_left.load_percentage|floatformat:1 }}% / {{ foot_right.load_percentage|floatformat:1 }}%
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <span class="label-sm">Estabilometria:</span>
+          {% if stabilometry %}
+            <ul class="list-items val-xs">
+              <li><strong>Comp. Trajeto:</strong> {{ stabilometry.path_length_mm|floatformat:1 }} mm</li>
+              <li><strong>Área:</strong> {{ stabilometry.area_mm2|floatformat:1 }} mm²</li>
+              <li><strong>Extensão/Área:</strong> {{ stabilometry.extension_area_ratio|floatformat:2 }} 1/mm</li>
+              <li><strong>Vel. Média:</strong> {{ stabilometry.avg_velocity_mm_s|floatformat:1 }} mm/s</li>
+              <li><strong>Esq/Dir:</strong> {{ stabilometry.sway_left|floatformat:1 }}% / {{ stabilometry.sway_right|floatformat:1 }}%</li>
+              <li><strong>Ant/Post:</strong> {{ stabilometry.sway_anterior|floatformat:1 }}% / {{ stabilometry.sway_posterior|floatformat:1 }}%</li>
+            </ul>
+          {% else %}
+            <div class="val-md val-xs">Sem dados</div>
+          {% endif %}
+        </div>
+
+        <button class="btn btn-action" type="button" disabled title="Disponível em breve">
+          <i class="bi bi-file-earmark-pdf"></i> Gerar Relatório PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Exames Recentes</h2>
+    <p class="muted">{{ total_exams }} exame{{ total_exams|pluralize }} · {{ total_patients }} paciente{{ total_patients|pluralize }}</p>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in recent_exams %}
+            <tr>
+              <td>{{ e.patient.name }}</td>
+              <td>{{ e.get_exam_type_display }}</td>
+              <td>{{ e.exam_date|date:'d/m/Y H:i' }}</td>
+              <td>
+                <a href="{% url 'dashboard' %}?exam={{ e.pk }}" class="btn btn-sm">Analisar</a>
+                <a href="{% url 'exam_detail' e.pk %}" class="btn btn-sm">Ver</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4">Nenhum exame ainda.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'core/js/heatmap.js' %}"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // ---- Configuração vinda do Django ----
+      // Os nomes de URL abaixo assumem que cada rota tem o mesmo nome da view
+      // (api_simulate_frame / api_latest_snapshot). Ajuste se o seu urls.py usar outros.
+      const CFG = {
+        simulateUrl: "{% url 'api_simulate_frame' %}",
+        snapshotUrl: {% if exam %}"{% url 'api_latest_snapshot' exam.pk %}"{% else %}null{% endif %},
+        pollMs: 200,
+        pressureMax: {{ pressure_max|default:8|unlocalize }},
+      };
+
+      // ---- Elementos ----
+      const canvas = document.getElementById('heatmap-canvas');
+      const ctx = canvas.getContext('2d');
+      const footArea = document.getElementById('foot-area');
+      const footImg = document.getElementById('foot-img');
+      const sideSelect = document.getElementById('side-select');
+      const examSelect = document.getElementById('exam-select');
+      const frameCounter = document.getElementById('frame-counter');
+      const lastUpdate = document.getElementById('last-update');
+      const statusEl = document.getElementById('sim-status');
+      const peakEl = document.getElementById('val-pico');
+      const btnStart = document.getElementById('btn-start');
+      const btnStop = document.getElementById('btn-stop');
+
+      // ---- Estado ----
+      let running = false;
+      let frame = 0;
+      let timer = null;
+      let controller = null;
+      let lastFrame = null; // { matrix, rows, cols, maxValue, placeholder } para redesenhar
+
+      // ---- Desenho ----
+      function currentMask() {
+        return footImg.complete && footImg.naturalWidth > 0 ? footImg : null;
+      }
+
+      function render(matrix, rows, cols, maxValue, placeholder) {
+        lastFrame = { matrix, rows, cols, maxValue, placeholder };
+        drawHeatmap(ctx, canvas, matrix, rows, cols, {
+          maxValue: maxValue || CFG.pressureMax,
+          mask: currentMask(),
+          background: null,
+          placeholder: placeholder,
+        });
+      }
+
+      function renderEmpty(message = 'Aguardando dados...') {
+        render([], {{ grid_rows }}, {{ grid_cols }}, CFG.pressureMax, message);
+      }
+
+      function matrixPeak(matrix) {
+        let peak = 0;
+        for (const row of matrix) for (const v of row) if (v > peak) peak = v;
+        return peak;
+      }
+
+      // Se a imagem terminar de carregar depois do primeiro desenho, redesenha com a máscara.
+      footImg.addEventListener('load', () => {
+        if (lastFrame) {
+          render(lastFrame.matrix, lastFrame.rows, lastFrame.cols, lastFrame.maxValue, lastFrame.placeholder);
+        }
+      });
+
+      // ---- Lado do pé: espelha a imagem + mapa quando for o lado oposto ao do PNG ----
+      function applySide() {
+        footArea.classList.toggle('mirrored', sideSelect.value !== footArea.dataset.imageSide);
+      }
+
+      // ---- Exame salvo (quando não está simulando) ----
+      async function loadSnapshot() {
+        if (!CFG.snapshotUrl) {
+          renderEmpty('Nenhum exame selecionado');
+          return;
+        }
+        try {
+          const res = await fetch(`${CFG.snapshotUrl}?side=${sideSelect.value}`, {
+            headers: { Accept: 'application/json' },
+          });
+          if (!res.ok) {
+            renderEmpty('Sem dados para este pé');
+            return;
+          }
+          const data = await res.json();
+          if (running) return; // a simulação começou enquanto carregava
+          render(data.matrix, data.rows, data.cols, data.max_value);
+          frameCounter.textContent = data.frame;
+          lastUpdate.textContent = new Date(data.captured_at).toLocaleTimeString();
+          peakEl.textContent = (matrixPeak(data.matrix)).toFixed(2);
+        } catch (err) {
+          console.error('Erro ao carregar snapshot:', err);
+          renderEmpty('Erro ao carregar dados');
+        }
+      }
+
+      // ---- Simulação por polling HTTP ----
+      function setStatus(text, isRunning) {
+        statusEl.textContent = text;
+        statusEl.classList.toggle('is-running', isRunning);
+        btnStart.disabled = isRunning;
+        btnStop.disabled = !isRunning;
+      }
+
+      async function tick() {
+        if (!running) return;
+        const startedAt = performance.now();
+
+        try {
+          controller = new AbortController();
+          const res = await fetch(`${CFG.simulateUrl}?frame=${frame}`, {
+            signal: controller.signal,
+            headers: { Accept: 'application/json' },
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (!running) return;
+
+          frame += 1;
+          render(data.matrix, data.rows, data.cols, data.max_value);
+          frameCounter.textContent = frame;
+          lastUpdate.textContent = new Date().toLocaleTimeString();
+          peakEl.textContent = matrixPeak(data.matrix).toFixed(2);
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          console.error('Erro na simulação:', err);
+          stop('⚠ Erro na simulação');
+          return;
+        }
+
+        // Evita requisições sobrepostas: só agenda a próxima depois que esta terminou.
+        const wait = Math.max(0, CFG.pollMs - (performance.now() - startedAt));
+        timer = setTimeout(tick, wait);
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+        frame = 0;
+        setStatus('▶ Rodando', true);
+        tick();
+      }
+
+      function stop(message) {
+        running = false;
+        clearTimeout(timer);
+        if (controller) controller.abort();
+        setStatus(message || '⏸ Parado', false);
+      }
+
+      // ---- Eventos ----
+      btnStart.addEventListener('click', start);
+      btnStop.addEventListener('click', () => stop());
+      sideSelect.addEventListener('change', () => {
+        applySide();
+        if (!running) loadSnapshot();
+      });
+      if (examSelect) {
+        examSelect.addEventListener('change', () => examSelect.form.submit());
+      }
+      window.addEventListener('beforeunload', () => stop());
+
+      // ---- Início ----
+      applySide();
+      renderEmpty();
+      loadSnapshot();
+    })();
+  </script>
+{% endblock %}

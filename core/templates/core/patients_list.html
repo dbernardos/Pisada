@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block title %}
+  Pacientes
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="page-header">
+      <h1>Pacientes</h1>
+      <a href="{% url 'patient_create' %}" class="btn btn-primary">+ Novo Paciente</a>
+    </div>
+    <br />
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Idade</th>
+          <th>Sexo</th>
+          <th>IMC</th>
+          <th>Exames</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+          <tr>
+            <td>
+              <a href="{% url 'patient_detail' p.pk %}">{{ p.name }}</a>
+            </td>
+            <td>{{ p.age }}</td>
+            <td>{{ p.get_gender_display }}</td>
+            <td>{{ p.bmi|default:'—' }}</td>
+            <td>{{ p.exam_count }}</td>
+            <td>
+              <a href="{% url 'patient_edit' p.pk %}" class="btn btn-sm">Editar</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6">Nenhum paciente cadastrado.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

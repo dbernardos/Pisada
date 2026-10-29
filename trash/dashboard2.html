@@ -1,0 +1,222 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}
+  Dashboard - Baropodometria
+{% endblock %}
+
+{% block content %}
+  <div class="dashboard-card">
+    <h2 class="dashboard-title">Análise de Pisada - Relatório de Pressão Plantar</h2>
+
+    <div class="controls">
+      <button id="btn-start" class="btn btn-primary">▶ Iniciar Simulação</button>
+      <button id="btn-stop" class="btn btn-secondary" disabled>⏹ Parar</button>
+      <label>
+        Pé:<select id="side-select">
+          <option value="L">Esquerdo</option>
+          <option value="R">Direito</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="grid-container">
+      <!-- Painel Esquerdo: Dados do Paciente e Exame -->
+      <div class="left-panel">
+        <div class="info-card">
+          <span class="label-sm">Paciente:</span>
+          <div class="val-md">{{ paciente.nome|default:'Nenhum paciente' }}</div>
+
+          <span class="label-sm">Nascimento:</span>
+          <div class="val-md">{{ paciente.data_nascimento|date:'d/m/Y'|default:'-' }}</div>
+
+          <span class="label-sm">Calçado / Peso / Estatura:</span>
+          <div class="val-md" style="font-size: 13px;">{{ paciente.calcado|default:'-' }} | {{ paciente.peso|default:'--' }}kg | {{ paciente.estatura|default:'--' }}cm</div>
+
+          <span class="label-sm">Data / Hora Exame:</span>
+          <div class="val-md" style="font-size: 13px;">{{ exame.data_hora|date:'d/m/Y H:i'|default:'--' }}</div>
+
+          <span class="label-sm">Profissional:</span>
+          <div class="val-md" style="font-size: 13px;">{{ exame.profissional_responsavel|default:'--' }}</div>
+        </div>
+
+        <div class="info-card">
+          <span class="label-sm">Métricas Pé Esquerdo:</span>
+          <div class="val-md" style="font-size: 12px;">
+            Superfície: {{ exame.pe_esq_superficie }} cm²<br />
+            P. Máx: {{ exame.pe_esq_p_max }} | P. Méd: {{ exame.pe_esq_p_med }} kg/cm²
+          </div>
+
+          <span class="label-sm" style="margin-top: 8px;">Métricas Pé Direito:</span>
+          <div class="val-md" style="font-size: 12px;">
+            Superfície: {{ exame.pe_dir_superficie }} cm²<br />
+            P. Máx: {{ exame.pe_dir_p_max }} | P. Méd: {{ exame.pe_dir_p_med }} kg/cm²
+          </div>
+        </div>
+      </div>
+
+      <!-- Painel Central: Imagem Transparente da Planta do Pé e Mapa de Calor -->
+      <div class="heatmap-container">
+        <div class="foot-grid-area">
+          <!-- Imagem com fundo transparente da planta do pé -->
+          <img src="{% static 'core/images/mapa_planta_pe.png' %}" alt="Mapa da Planta do Pé" class="foot-image-bg" />
+
+          <!-- Manchas de Calor baseadas nos dados do sensor ou do exame -->
+          <div id="spot-halux" class="heat-spot"></div>
+          <div id="spot-dedos" class="heat-spot"></div>
+          <div id="spot-antepe-med" class="heat-spot"></div>
+          <div id="spot-antepe-lat" class="heat-spot"></div>
+          <div id="spot-calcaneo" class="heat-spot"></div>
+        </div>
+
+        <div class="legend-box">
+          <div class="legend-title">Legenda de Pressão (kg/cm²)</div>
+          <div class="legend-bar"></div>
+          <div class="legend-ticks">
+            <span>0</span>
+            <span>2</span>
+            <span>4</span>
+            <span>6</span>
+            <span>8+</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <span>Frame: <strong id="frame-counter">0</strong></span>
+          <span>Última atualização: <strong id="last-update">—</strong></span>
+        </div>
+      </div>
+
+      <!-- Painel Direito: Distribuição e Estabilometria -->
+      <div class="right-panel">
+        <div class="info-card">
+          <span class="label-sm">Pico de Pressão Geral:</span>
+          <div class="pressure-peak">
+            <span id="val-pico">{{ exame.pe_dir_p_max|default:'9.8' }}</span>
+            <span class="pressure-unit">kg/cm²</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <span class="label-sm">Distribuição de Pressão:</span>
+          <ul class="list-items" style="font-size: 12px;">
+            <li>
+              <strong>Ant-Post:</strong> {{ exame.dist_antero_posterior|default:'-' }}
+            </li>
+            <li>
+              <strong>Lateral:</strong> {{ exame.dist_lateral|default:'-' }}
+            </li>
+            <li>
+              <strong>Membro:</strong> {{ exame.dist_membro|default:'-' }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <span class="label-sm">Estabilometria:</span>
+          <ul class="list-items" style="font-size: 12px;">
+            <li>
+              <strong>Corpo:</strong> {{ exame.estabilometria_corpo|default:'-' }}
+            </li>
+            <li>
+              <strong>Comp. Trajeto:</strong> {{ exame.comprimento_trajeto }} mm
+            </li>
+            <li>
+              <strong>Área:</strong> {{ exame.area_estabilometria }} mm²
+            </li>
+            <li>
+              <strong>Vel. Média:</strong> {{ exame.velocidade_media }} mm/s
+            </li>
+            <li>
+              <strong>Esq/Dir:</strong> {{ exame.estabilometria_pe_esq }}% / {{ exame.estabilometria_pe_dir }}%
+            </li>
+          </ul>
+        </div>
+
+        <button class="btn-action"><i class="bi bi-file-earmark-pdf"></i> Gerar Relatório PDF</button>
+      </div>
+    </div>
+  </div>
+  
+{% comment %} TABELA COMECOU AQUI {% endcomment %}
+  <div class="dashboard-grid">
+    <div class="card"></div>
+
+    <div class="card">
+      <h2>Exames Recentes</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for exam in recent_exams %}
+            <tr>
+              <td>{{ exam.patient.name }}</td>
+              <td>{{ exam.get_exam_type_display }}</td>
+              <td>{{ exam.exam_date|date:'d/m/Y H:i' }}</td>
+              <td>
+                <a href="{% url 'exam_detail' exam.pk %}" class="btn btn-sm">Ver</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4">Nenhum exame ainda.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'core/js/heatmap.js' %}"></script>
+  <script>
+    const canvas = document.getElementById('heatmap-canvas');
+    const ctx = canvas.getContext('2d');
+    const frameCounter = document.getElementById('frame-counter');
+    const lastUpdate = document.getElementById('last-update');
+    const statusEl = document.getElementById('sim-status');
+    const btnStart = document.getElementById('btn-start');
+    const btnStop = document.getElementById('btn-stop');
+
+    let ws = null;
+
+    function connectSimulation() {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        ws = new WebSocket(`${proto}://${location.host}/ws/simulate/`);
+
+        ws.onopen = () => {
+            statusEl.textContent = '▶ Rodando';
+            statusEl.style.color = '#2ecc71';
+            btnStart.disabled = true;
+            btnStop.disabled = false;
+        };
+
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            drawHeatmap(ctx, canvas, data.matrix, data.rows, data.cols);
+            frameCounter.textContent = data.frame;
+            lastUpdate.textContent = new Date().toLocaleTimeString();
+        };
+
+        ws.onclose = () => {
+            statusEl.textContent = '⏸ Parado';
+            statusEl.style.color = '';
+            btnStart.disabled = false;
+            btnStop.disabled = true;
+        };
+    }
+
+    btnStart.addEventListener('click', connectSimulation);
+    btnStop.addEventListener('click', () => { if (ws) ws.close(); });
+
+    // Desenho inicial vazio
+    drawHeatmap(ctx, canvas, [], {{ grid_rows }}, {{ grid_cols }});
+</script>
+{% endblock %}

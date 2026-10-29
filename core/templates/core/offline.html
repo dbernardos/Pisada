@@ -1,0 +1,23 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>Sem conexão - Baropodometria</title>
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}" />
+  </head>
+  <body>
+    <main class="container">
+      <div class="dashboard-card" style="text-align: center; margin-top: 10vh;">
+        <img src="{% static 'core/images/logo.png' %}" alt="" class="logo-img" style="margin-bottom: 16px;" />
+        <h1>Sem conexão</h1>
+        <p class="muted" style="margin-bottom: 20px;">
+          O sistema precisa se comunicar com o servidor para mostrar pacientes, exames e o mapa de calor.
+          Verifique a rede e tente novamente.
+        </p>
+        <button class="btn btn-primary" type="button" onclick="location.reload()">Tentar novamente</button>
+      </div>
+    </main>
+  </body>
+</html>

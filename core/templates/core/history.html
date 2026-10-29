@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+
+{% block title %}Histórico de Exames{% endblock %}
+
+{% block content %}
+
+<div class="card">
+<h1>Histórico de Exames</h1>
+
+<form method="get" class="filters">
+    <label>Paciente:
+        <select name="patient">
+            <option value="">Todos</option>
+            {% for p in patients %}
+            <option value="{{ p.pk }}" {% if request.GET.patient == p.pk|stringformat:"s" %}selected{% endif %}>
+                {{ p.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>Tipo:
+        <select name="type">
+            <option value="">Todos</option>
+            {% for value, label in exam_types %}
+            <option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Paciente</th>
+            <th>Tipo</th>
+            <th>Profissional</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exam in exams %}
+        <tr>
+            <td>{{ exam.exam_date|date:"d/m/Y H:i" }}</td>
+            <td><a href="{% url 'patient_detail' exam.patient.pk %}">{{ exam.patient.name }}</a></td>
+            <td>{{ exam.get_exam_type_display }}</td>
+            <td>{{ exam.doctor.name|default:"—" }}</td>
+            <td><a href="{% url 'exam_detail' exam.pk %}" class="btn btn-sm">Ver</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum exame encontrado.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

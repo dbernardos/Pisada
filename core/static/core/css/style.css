@@ -1,0 +1,580 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* =========================================
+   1. VARIÁVEIS GLOBAIS (Facilita a manutenção)
+   ========================================= */
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: rgba(15, 23, 42, 0.6);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #38bdf8;
+  --accent-success: #22c55e;
+  --accent-danger: #ef4444;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}
+
+/* =========================================
+   2. RESET E BASE
+   ========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* =========================================
+   3. HEADER & NAVEGAÇÃO
+   ========================================= */
+.header {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 12px 24px;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+}
+
+.nav-capsule {
+  display: flex;
+  background: var(--bg-primary);
+  padding: 4px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+  gap: 4px;
+}
+
+.nav-btn {
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover, .nav-btn:focus-visible {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+
+.nav-btn.active {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+.user-actions {
+  display: flex;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.user-actions span:hover {
+  color: var(--text-primary);
+}
+
+/* =========================================
+   4. DASHBOARD & CARDS
+   ========================================= */
+.dashboard-card, .card {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1rem;
+}
+
+.dashboard-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+/* Layout Grid System (Responsivo em 3 etapas) */
+.grid-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .grid-container {
+    grid-template-columns: 280px 1fr; /* Tablet: remove a coluna da direita */
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-container {
+    grid-template-columns: 1fr; /* Mobile: tudo em uma coluna */
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .nav-capsule {
+    width: 100%;
+    overflow-x: auto; /* Permite rolagem horizontal nos botões se faltar espaço */
+  }
+  
+  .user-actions {
+    align-self: flex-end;
+  }
+}
+
+/* =========================================
+   5. INFO CARDS & CONTEÚDO
+   ========================================= */
+.info-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.label-sm {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.val-md {
+  font-size: 15px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.pressure-peak {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+#val-pico {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent-danger);
+}
+
+.pressure-unit {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.list-items {
+  list-style: none;
+}
+
+.list-items li {
+  padding: 4px 0;
+  color: #cbd5e1;
+}
+
+/* =========================================
+   6. HEATMAP (CORREÇÃO CRÍTICA DE RESPONSIVIDADE)
+   ========================================= */
+.heatmap-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.foot-grid-area {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+  /* Mantém a proporção original (260x420) em qualquer tamanho de tela */
+  aspect-ratio: 260 / 420; 
+  background-size: 20px 20px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: var(--bg-tertiary);
+}
+
+.foot-image-bg {
+  position: absolute;
+  width: 100%; /* Escala com o container */
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Canvas do mapa de calor: cobre a imagem da planta do pé e escala com o container. */
+.foot-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Pé oposto ao do PNG: espelha imagem + mapa juntos. */
+.foot-grid-area.mirrored {
+  transform: scaleX(-1);
+}
+
+/* =========================================
+   7. LEGENDA
+   ========================================= */
+.legend-box {
+  width: 100%;
+  max-width: 260px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.legend-title {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.legend-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+  margin-bottom: 4px;
+}
+
+.legend-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* =========================================
+   8. COMPONENTES REUTILIZÁVEIS (NOVO CSS UNIFICADO)
+   ========================================= */
+/* Wrapper para tabelas em telas pequenas */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-secondary); /* Unificado com o tema escuro */
+  color: var(--text-primary);
+  min-width: 500px; /* Garante que a tabela não fique esmagada no mobile */
+}
+
+.table th, .table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table th {
+  background: rgba(56, 189, 248, 0.1); /* Azul sutil */
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  gap: 6px;
+  background: #334155;
+  color: var(--text-primary);
+}
+.btn:hover { background: #475569; color: var(--text-primary); }
+.btn:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+
+.btn-primary { background: var(--accent-primary); color: var(--bg-primary); }
+.btn-primary:hover { background: #0ea5e9; color: var(--bg-primary); }
+
+.btn-secondary { background: #475569; color: var(--text-primary); }
+.btn-secondary:hover { background: #64748b; }
+
+.btn-action {
+  width: 100%;
+  background: var(--accent-success);
+  color: var(--bg-primary);
+  margin-top: 12px;
+  font-weight: 600;
+}
+.btn-action:hover { background: #16a34a; color: var(--bg-primary); }
+
+.btn-sm { padding: 0.25rem 0.6rem; font-size: 0.8rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Filtros */
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filters label { 
+  display: flex; 
+  flex-direction: column; 
+  font-size: 0.9rem; 
+  color: var(--text-secondary);
+  flex: 1 1 180px; /* Permite que os campos cresçam e encolham */
+}
+
+.filters select,
+.controls select {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+/* Utilitários */
+.muted { color: var(--text-secondary); font-size: 0.9rem; }
+.error { color: var(--accent-danger); font-size: 0.85rem; margin-top: 0.25rem; }
+
+.alert { padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; }
+.alert-success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+.alert-error { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* Dashboard Grid (Corrigido para mobile) */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 380px era muito largo para celulares */
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* =========================================
+   9. LAYOUT BASE (classes usadas pelos templates)
+   ========================================= */
+a { color: var(--accent-primary); }
+a:hover { color: #7dd3fc; }
+
+h1 { font-size: 1.6rem; font-weight: 600; margin-bottom: 1rem; }
+.container > h2 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
+.card h2, .card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+.card p { line-height: 1.5; }
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  flex: 1;
+}
+
+.footer {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: auto;
+  padding: 1.25rem 0 0.5rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.page-header h1 { margin-bottom: 0; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-item {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+.info-item strong { color: var(--text-secondary); font-weight: 500; margin-right: 0.25rem; }
+
+/* =========================================
+   10. FORMULÁRIOS
+   ========================================= */
+.form-card {
+  width: 100%;
+  max-width: 640px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.form-group { margin-bottom: 1rem; }
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  color-scheme: dark; /* calendário e setas escuros nos campos de data/número */
+}
+
+.form-group input[type='checkbox'] { width: auto; }
+.form-group textarea { min-height: 100px; resize: vertical; }
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+/* Mensagens do Django (message.tags) */
+.alert-warning { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
+.alert-info { background: rgba(56, 189, 248, 0.1); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.2); }
+
+/* =========================================
+   11. DASHBOARD: CONTROLES E DETALHES
+   ========================================= */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.controls select {
+  margin-top: 0;
+  max-width: 280px;
+}
+
+.exam-picker { margin-left: auto; }
+
+.sim-status {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.sim-status.is-running { color: var(--accent-success); }
+
+.val-sm { font-size: 13px; }
+.val-xs { font-size: 12px; }
+.label-spaced { margin-top: 8px; }
+
+.info-row {
+  width: 100%;
+  max-width: 260px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.info-row strong { color: var(--text-primary); font-weight: 500; }
+
+a.btn-action { text-align: center; }
+
+.card .muted { margin-bottom: 0.75rem; }

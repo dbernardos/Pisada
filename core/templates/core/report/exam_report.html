@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Relatório - {{ patient_name }}</title>
+<style>
+  /* Cabeçalho e rodapé são "running elements": o WeasyPrint os repete em todas as páginas. */
+  @page {
+    size: A4;
+    margin: 66mm 15mm 24mm 15mm;
+    @top-center    { content: element(page-header); vertical-align: top; width: 100%; }
+    @bottom-left   { content: element(page-date);   vertical-align: middle; }
+    @bottom-right  { content: element(page-logo);   vertical-align: middle; }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Poppins", "Open Sans", "DejaVu Sans", Arial, sans-serif;
+    font-size: 10pt;
+    color: #1e293b;
+  }
+
+  /* ---------- Cabeçalho ---------- */
+  #page-header { position: running(page-header); width: 100%; padding-top: 8mm; }
+  .doc-title { margin: 0; text-align: center; font-size: 17pt; font-weight: 700; color: #0b6fa4; }
+  .doc-subtitle { margin: 3mm 0 0; text-align: center; font-size: 9pt; color: #475569; line-height: 1.5; }
+  .rule { border: 0; border-top: 1px solid #0b6fa4; margin: 4mm 0; }
+  .patient-name { margin: 0 0 1.5mm; font-size: 12pt; font-weight: 700; color: #0b6fa4; }
+  .meta { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  .meta td { padding: 0.5mm 0; vertical-align: top; }
+  .meta td:last-child { width: 50%; }
+
+  /* ---------- Rodapé ---------- */
+  #page-date { position: running(page-date); font-size: 9pt; color: #475569; }
+  #page-logo { position: running(page-logo); }
+  #page-logo img { height: 9mm; width: auto; }
+
+  /* ---------- Páginas ---------- */
+  .page + .page { break-before: page; }
+  h2.section-title { margin: 0 0 2mm; text-align: center; font-size: 15pt; font-weight: 700; color: #0b6fa4; }
+  .note { margin: 0 0 3mm; text-align: center; font-size: 8pt; color: #64748b; }
+  .figure { width: 100%; }
+  .figure img { display: block; width: 100%; height: auto; margin: 0 auto; }
+
+  /* ---------- Tabelas por pé ---------- */
+  .feet { width: 100%; border-collapse: separate; border-spacing: 8mm 0; margin-top: 4mm; table-layout: fixed; }
+  table.foot { width: 100%; border-collapse: collapse; font-size: 9pt; text-align: center; }
+  table.foot th, table.foot td { border: 1px solid #334155; padding: 1.6mm 1mm; }
+  table.foot th.name { font-weight: 400; }
+  table.foot th { font-weight: 400; }
+
+  /* ---------- Distribuição ---------- */
+  .gauges { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .gauges td { vertical-align: top; text-align: center; padding: 0 2mm; }
+  .gauge-title { margin: 0 0 1mm; font-size: 11pt; color: #334155; }
+  .gauge-row-spacer { height: 6mm; }
+
+  /* ---------- Estabilometria ---------- */
+  .stab-top { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 4mm; }
+  .stab-top td { vertical-align: middle; }
+  .stab-top img, .stab-bottom img { width: 100%; height: auto; display: block; }
+  .global h3 { margin: 0 0 2mm; font-size: 12pt; }
+  .global p { margin: 0 0 1.2mm; font-size: 11pt; line-height: 1.4; }
+  .global .sway { margin-top: 3mm; font-size: 8.5pt; color: #475569; }
+  .stab-bottom { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .stab-bottom td { text-align: center; vertical-align: top; padding: 0 4mm; }
+
+  /* ---------- Assinatura ---------- */
+  .signature { width: 70mm; margin: 8mm auto 0; text-align: center; break-inside: avoid; }
+  .signature img { height: 16mm; width: auto; display: block; margin: 0 auto 1mm; }
+  .signature .line { border-top: 1px solid #0f172a; padding-top: 1.5mm; font-size: 8.5pt; }
+  .empty { margin-top: 30mm; text-align: center; color: #64748b; }
+</style>
+</head>
+<body>
+
+<div id="page-header">
+  <h1 class="doc-title">{{ report_title }}</h1>
+  {% if report_subtitle_lines %}
+  <p class="doc-subtitle">{% for line in report_subtitle_lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</p>
+  {% endif %}
+  <hr class="rule">
+  <p class="patient-name">{{ patient_name }}</p>
+  <table class="meta">
+    <tr>
+      <td><strong>Data de Nascimento:</strong> {{ birth_text }}</td>
+      <td><strong>Data do Exame:</strong> {{ exam_date_text }}</td>
+    </tr>
+    <tr>
+      <td><strong>Calçado:</strong> {{ footwear_text }} | <strong>Peso:</strong> {{ weight_text }} | <strong>Altura:</strong> {{ height_text }}</td>
+      <td><strong>Responsável:</strong> {{ responsible }}</td>
+    </tr>
+  </table>
+  <hr class="rule">
+</div>
+<div id="page-date">{{ report_date }}</div>
+<div id="page-logo">{% if logo %}<img src="{{ logo }}" alt="">{% endif %}</div>
+
+{% if 'static' in pages %}
+<section class="page">
+  <h2 class="section-title">{{ analysis_title }}</h2>
+  <p class="note">{{ static_note }}</p>
+  <div class="figure"><img src="{{ static_image }}" alt="Mapa de pressão plantar"></div>
+  <table class="feet">
+    <tr>
+      {% for foot in feet %}
+      <td>
+        <table class="foot">
+          <tr><th colspan="3" class="name">{{ foot.label }}</th></tr>
+          <tr><th>Superfície</th><th>P. máx.</th><th>P. méd.</th></tr>
+          <tr>
+            <td>{{ foot.surface }}<br>{{ foot.load }}</td>
+            <td>{{ foot.pmax }}</td>
+            <td>{{ foot.pavg }}</td>
+          </tr>
+        </table>
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+</section>
+{% endif %}
+
+{% if 'distribution' in pages %}
+<section class="page">
+  <h2 class="section-title">Distribuição de Pressão</h2>
+  <table class="gauges">
+    <tr>
+      <td><p class="gauge-title">Antero-posterior</p>{{ gauges.ap|safe }}</td>
+      <td><p class="gauge-title">Lateral</p>{{ gauges.lat|safe }}</td>
+    </tr>
+    <tr class="gauge-row-spacer"><td colspan="2"></td></tr>
+    <tr>
+      <td><p class="gauge-title">Pé esquerdo</p>{{ gauges.left|safe }}</td>
+      <td><p class="gauge-title">Pé direito</p>{{ gauges.right|safe }}</td>
+    </tr>
+  </table>
+</section>
+{% endif %}
+
+{% if 'stab_global' in pages %}
+<section class="page">
+  <h2 class="section-title">Estabilometria</h2>
+  <table class="stab-top">
+    <tr>
+      <td class="global" style="width: 45%;">
+        <h3>Dados Globais</h3>
+        <p>Comprimento do trajeto: {{ stab.path_length }}</p>
+        <p>Área: {{ stab.area }}</p>
+        <p>Extensão/Área: {{ stab.ratio }}</p>
+        <p>Velocidade média: {{ stab.velocity }}</p>
+        {% if stab.sway %}<p class="sway">{{ stab.sway }}</p>{% endif %}
+      </td>
+      <td>{% if cop_body_image %}<img src="{{ cop_body_image }}" alt="CoP do corpo">{% endif %}</td>
+    </tr>
+  </table>
+  <table class="stab-bottom">
+    <tr>
+      <td>{% if cop_left_image %}<img src="{{ cop_left_image }}" alt="CoP do pé esquerdo">{% endif %}</td>
+      <td>{% if cop_right_image %}<img src="{{ cop_right_image }}" alt="CoP do pé direito">{% endif %}</td>
+    </tr>
+  </table>
+</section>
+{% endif %}
+
+{% if 'stab_series' in pages %}
+<section class="page">
+  <h2 class="section-title">Estabilometria</h2>
+  <div class="figure"><img src="{{ series_image }}" alt="Séries temporais do centro de pressão"></div>
+</section>
+{% endif %}
+
+{% if 'surface' in pages %}
+<section class="page">
+  <h2 class="section-title">3D</h2>
+  <div class="figure"><img src="{{ surface_image }}" alt="Superfície 3D da pressão plantar"></div>
+</section>
+{% endif %}
+
+{% if not pages %}
+<section class="page">
+  <p class="empty">Este exame ainda não possui dados de pressão ou estabilometria para o relatório.</p>
+</section>
+{% endif %}
+
+{# A assinatura aparece uma única vez, logo após a última página com conteúdo. #}
+<div class="signature">
+  {% if signature %}<img src="{{ signature }}" alt="Assinatura">{% endif %}
+  <div class="line">{{ signature_name }}</div>
+</div>
+
+</body>
+</html>
